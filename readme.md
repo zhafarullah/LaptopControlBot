@@ -45,7 +45,6 @@ A powerful Telegram bot that allows you to remotely control your Windows laptop 
 ### Prerequisites
 
 - Windows 10/11
-- Python 3.10.x
 - Active internet connection
 - Telegram account
 
@@ -68,47 +67,44 @@ A powerful Telegram bot that allows you to remotely control your Windows laptop 
 
 1. Download the latest release from [Releases](https://github.com/zhafarullah/LaptopControlBot/releases/)
 2. Extract the files to a folder
-3. Create `config.py`
-4. Copy `config_template.py` to `config.py`
-5. Edit `config.py` with your details:
+3. **Run `LaptopControlBot.exe`** directly
+4. The program will automatically create a `config.py` template and exit with instructions
+5. Edit the auto-generated `config.py` with your details:
 
 ```python
-# config.py
+# config.py (auto-generated template)
 BOT_TOKEN = 'your_bot_token_here'
 AUTHORIZED_USER_ID = 123456789  # Your Telegram user ID
 BOT_PASSWORD = 'your_secure_password'
 ```
 
-5. Run `LaptopControlBot.exe`
+6. **Run `LaptopControlBot.exe` again** to start the bot
 
 #### Option B: Run from Source
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/laptop-control-bot.git
-cd laptop-control-bot
+git clone https://github.com/zhafarullah/LaptopControlBot.git
+cd LaptopControlBot
 ```
 
-2. Install dependencies:
+2. **Ensure Python 3.10.x is installed**:
+```bash
+python --version  # Should show Python 3.10.x
+```
+
+3. Install dependencies (recommended in virtual environment):
 ```bash
 pip install -r requirements.txt
-```
-(recommended to install on the virtual enviroment and use python version 3.10.x)
-
-3. Create `config.py`:
-```python
-# config.py
-BOT_TOKEN = 'your_bot_token_here'
-AUTHORIZED_USER_ID = 123456789
-BOT_PASSWORD = 'your_secure_password'
-WEBCAM_VIDEO_DEVICE = "HD User Facing"  # Optional
-WEBCAM_AUDIO_DEVICE = "Microphone Array"  # Optional
 ```
 
 4. Run the bot:
 ```bash
 python main.py
 ```
+   - The program will auto-create `config.py` template on first run
+   - Edit `config.py` with your bot details
+   - Run `python main.py` again to start
 
 ### 4. First Login
 
@@ -171,14 +167,19 @@ WEBCAM_VIDEO_DEVICE = "Your Camera Name"
 WEBCAM_AUDIO_DEVICE = "Your Microphone Name"
 ```
 
-### FFmpeg Installation (Optional)
+### FFmpeg Installation (Required for Video Recording with Audio)
 
-For better video recording quality:
+For video recording with audio support:
 
 1. Download FFmpeg from [ffmpeg.org](https://ffmpeg.org/download.html)
 2. Extract to a folder (e.g., `C:\ffmpeg`)
-3. Add `C:\ffmpeg\bin` to your system PATH
-4. Restart the bot
+3. **Add `C:\ffmpeg\bin` to your system PATH**:
+   - Open "Environment Variables" in Windows
+   - Add `C:\ffmpeg\bin` to the PATH variable
+4. **Restart your computer** to apply PATH changes
+5. Verify installation by opening Command Prompt and typing: `ffmpeg -version`
+
+**Note**: Without FFmpeg, webcam video recording will use basic OpenCV recording (video only, no audio).
 
 ## 🚀 Auto-Start on Boot
 
@@ -204,7 +205,7 @@ For better video recording quality:
    - Check "Run with highest privileges"
    - Check "Run whether user is logged on"
    - Configure for: `Windows 11`
-   - On Conditions tab, check "start only if the following network connection is available"
+   - On Conditions tab, check "Start only if the following network connection is available"
 
 6. **Test the task**:
    - Right-click task → "Run"
@@ -229,63 +230,77 @@ For better video recording quality:
 ## 🛠️ Building from Source
 
 ### Prerequisites
-- Python 3.10+
-- All dependencies installed
-- PyInstaller
+- **Python 3.10.x** (ensure this exact version)
+- Git (for cloning)
 
 ### Build Steps
 
-1. **Clone repository**:
+1. **Verify Python Version**:
 ```bash
-git clone https://github.com/yourusername/laptop-control-bot.git
-cd laptop-control-bot
-```
-and open the Build Your Own FOlder
-
-2. **Install build dependencies**:
-```bash
-pip install pyinstaller
-pip install -r requirements.txt
+python --version  # Must show Python 3.10.x
 ```
 
-3. **Build executable**:
+2. **Clone repository**:
 ```bash
-# Manual build
-pyinstaller --onefile --noconsole --name "LaptopControlBot" --icon=icon.ico --add-data "config.py;." --add-data "modules;modules" --hidden-import "modules" --hidden-import "telegram" --hidden-import "PIL" --hidden-import "cv2" --hidden-import "psutil" --hidden-import "win32gui" main.py
+git clone https://github.com/zhafarullah/LaptopControlBot.git
+cd LaptopControlBot
+```
 
-# Or use automated build script
+3. **Navigate to Build Folder**:
+```bash
+cd "Build Your Own"
+```
+
+4. **Run Build Script**:
+```bash
 build.bat
 ```
 
-4. **Find executable**:
+The build script will automatically:
+- Create virtual environment with Python 3.10.x
+- Install all dependencies
+- Install PyInstaller
+- Build the executable
+- Create distribution package
+
+5. **Find executable**:
    - Output: `dist/LaptopControlBot.exe`
+   - Ready-to-distribute package in `dist/` folder
+
+**Manual Build Command** (if needed):
+```bash
+pyinstaller --onefile --noconsole --name "LaptopControlBot" --icon=icon.ico --add-data "modules;modules" --hidden-import "modules" --hidden-import "telegram" --hidden-import "PIL" --hidden-import "cv2" --hidden-import "psutil" --hidden-import "win32gui" main.py
+```
 
 ## 📁 Project Structure
 
 ```
-laptop-control-bot/
+LaptopControlBot/
 ├── main.py                     # Main entry point
-├── config.py                   # Configuration file
 ├── requirements.txt            # Python dependencies
-├── build.bat                   # Automated build script
+├── Build Your Own/             # Build tools and scripts
+│   ├── build.bat              # Automated build script
+│   ├── main.py                # Copy of main entry point
+│   ├── modules/               # Copy of bot modules
+│   └── requirements.txt       # Build dependencies
 ├── modules/                    # Bot modules
 │   ├── auth/                   # Authentication system
 │   │   └── handlers.py
-│   ├── system/                 # System control
+│   ├── system/                # System control
 │   │   ├── power.py
 │   │   ├── info.py
 │   │   └── monitoring.py
-│   ├── file_manager/           # File operations
+│   ├── file_manager/          # File operations
 │   │   ├── handlers.py
 │   │   └── operations.py
-│   ├── webcam/                 # Camera control
+│   ├── webcam/                # Camera control
 │   │   ├── capture.py
 │   │   └── video.py
-│   └── utils/                  # Utilities
+│   └── utils/                 # Utilities
 │       ├── helpers.py
 │       ├── decorators.py
 │       └── logging_setup.py
-└── logs/                       # Auto-generated logs
+└── logs/                      # Auto-generated logs
     ├── bot.log
     └── bot_errors.log
 ```
@@ -318,16 +333,32 @@ Allow the bot through Windows Firewall:
 - **Ensure bot is running (check system tray)**
 - **Check firewall settings**
 
+#### "Unauthorized" error
+- **Double-check bot token from @BotFather**
+- **Ensure no extra spaces in config.py**
+- **Verify config.py format is correct**
+
 #### "Access Denied" errors
 - **Run bot as Administrator**
 - **Check Windows permissions**
 - **Verify User Account Control settings**
 
 #### Webcam not working
-- **Install FFmpeg**
+- **Install FFmpeg and add to PATH**
 - **Run `/detectdevices` to find correct camera names**
 - **Check camera permissions in Windows Settings**
 - **Update camera drivers**
+
+#### Video recording fails
+- **Ensure FFmpeg is installed and in PATH**
+- **Restart computer after adding FFmpeg to PATH**
+- **Test FFmpeg: open Command Prompt and type `ffmpeg -version`**
+- **Use `/detectdevices` to find correct device names**
+
+#### Build fails
+- **Ensure Python version is exactly 3.10.x**
+- **Run build.bat from "Build Your Own" folder**
+- **Check if all dependencies are installed**
 
 #### File operations failing
 - **Check folder permissions**
@@ -353,6 +384,10 @@ Check log files for detailed error information:
 - **RAM**: 2GB minimum, 4GB recommended
 - **Storage**: 100MB free space
 - **Network**: Internet connection required
+
+### For Building from Source
+- **Python**: Exactly version 3.10.x
+- **FFmpeg**: For video recording with audio (optional)
 
 ### Python Dependencies
 ```
