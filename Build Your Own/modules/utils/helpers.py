@@ -17,38 +17,100 @@ class BotConfig:
     WEBCAM_AUDIO_DEVICE: str = "Microphone Array (Realtek(R) Audio)"
 
 def load_config():
-    """Load config dari file yang sama dengan executable"""
+    """Load config dengan auto-create template jika tidak ada"""
     try:
         if getattr(sys, 'frozen', False):
+            # Running as exe - config harus di folder exe
             base_dir = Path(sys.executable).parent
         else:
+            # Running as script
             base_dir = Path(__file__).parent.parent.parent
         
         config_path = base_dir / "config.py"
         
+        # Auto-create template jika config tidak ada
         if not config_path.exists():
-            print(f"Error: config.py not found at {config_path}")
-            print("Please create config.py with required variables")
-            input("Press Enter to exit...")
+            create_config_template(config_path)
+            print("=" * 50)
+            print("FIRST TIME SETUP REQUIRED!")
+            print("=" * 50)
+            print(f"Config template created: {config_path}")
+            print("\nPlease edit config.py with your details:")
+            print("1. Get bot token from @BotFather")
+            print("2. Get user ID from @userinfobot")
+            print("3. Set your password")
+            print("4. Restart the program")
+            input("\nPress Enter to exit...")
             exit(1)
         
-        # Import config secara dinamis
+        # Load dan validate config
         spec = importlib.util.spec_from_file_location("config", config_path)
         config_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(config_module)
+        
+        # Check if still using template values
+        if (hasattr(config_module, 'BOT_TOKEN') and 
+            config_module.BOT_TOKEN in ['your_bot_token_here', 'PLACEHOLDER_BUILD_TOKEN']):
+            print("=" * 50)
+            print("PLEASE CONFIGURE YOUR BOT!")
+            print("=" * 50)
+            print(f"Edit {config_path} with real values:")
+            print("- BOT_TOKEN: from @BotFather")
+            print("- AUTHORIZED_USER_ID: from @userinfobot")
+            print("- BOT_PASSWORD: your choice")
+            input("\nPress Enter to exit...")
+            exit(1)
         
         return BotConfig(
             BOT_TOKEN=config_module.BOT_TOKEN,
             AUTHORIZED_USER_ID=config_module.AUTHORIZED_USER_ID,
             BOT_PASSWORD=config_module.BOT_PASSWORD,
             WEBCAM_VIDEO_DEVICE=getattr(config_module, 'WEBCAM_VIDEO_DEVICE', "HD User Facing"),
-            WEBCAM_AUDIO_DEVICE=getattr(config_module, 'WEBCAM_AUDIO_DEVICE', "Microphone Array (Realtek(R) Audio)")
+            WEBCAM_AUDIO_DEVICE=getattr(config_module, 'WEBCAM_AUDIO_DEVICE', "Microphone Array")
         )
         
     except Exception as e:
         print(f"Error loading config: {e}")
         input("Press Enter to exit...")
         exit(1)
+
+def create_config_template(config_path):
+    """Create user-friendly config template"""
+    template = '''# config.py - Laptop Control Bot Configuration
+# Edit this file with your actual bot details
+
+# =================================================
+# STEP 1: Get Bot Token from @BotFather
+# =================================================
+# 1. Open Telegram and search for @BotFather
+# 2. Send /newbot and follow instructions  
+# 3. Copy the token and paste below
+BOT_TOKEN = 'your_bot_token_here'
+
+# =================================================
+# STEP 2: Get Your User ID from @userinfobot
+# =================================================
+# 1. Open Telegram and search for @userinfobot
+# 2. Send /start to get your user ID
+# 3. Copy the NUMBER (not username) and paste below
+AUTHORIZED_USER_ID = 123456789
+
+# =================================================
+# STEP 3: Choose Your Bot Password
+# =================================================
+# This password protects your bot from unauthorized access
+BOT_PASSWORD = 'your_password_here'
+
+# =================================================
+# OPTIONAL: Webcam Device Names
+# =================================================
+# Run /detectdevices command to find correct names
+WEBCAM_VIDEO_DEVICE = "HD User Facing"
+WEBCAM_AUDIO_DEVICE = "Microphone Array (Realtek(R) Audio)"
+'''
+    
+    with open(config_path, 'w', encoding='utf-8') as f:
+        f.write(template)
 
 def escape_md(text):
     """Escape MarkdownV2 special characters"""
